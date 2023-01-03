@@ -1,25 +1,33 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Stack;
 
 
 /******************************************************************************
- *  Compilation:  javac Deck.java
- *  Execution:    java Deck
- *
- *  Deal 52 cards uniformly at random.
+ *  Deal 108 cards uniformly at random.
  *
  *  % java Deck
- *  Ace of Clubs
- *  8 of Diamonds
- *  5 of Diamonds
- *  ...
- *  8 of Hearts
+ * Red 0
+ * Red 1
+ * ...
+ * Red Skip
+ * Wild Card
+ * .....
+ * Red Draw 2
  *
+ * Possiblities:
+ * 2 cards of each color 1-9
+ * 2 cards of each color for Draw 2, Skip, and Reverse
+ * 1 card of each color 0
+ * 4 Wild Cards
+ * 4 Wild Cards that are Draw 4
  ******************************************************************************/
 public class Deck {
 
     // maybe the value in map should be an integer not a string?
-    HashMap<String, String> deck = new HashMap<>();
+//    HashMap<String, String> deck = new HashMap<>();
+    ArrayList<String> deck = new ArrayList<>();
+    Stack<String> deckStack = new Stack<>();
     String[] COLORS = {
             "Red", "Yellow", "Blue", "Green"
     };
@@ -28,80 +36,69 @@ public class Deck {
             "9", "Skip", "Reverse", "Draw 2"
     };
 
-//    int n = SUITS.length * RANKS.length;
-
-
     public void createDeck() {
-
-
         // initialize deck
-
         // makes two cards of each type for color
 
-        for (int i = 0; i < 2 ; i++) {
+        for (int i = 0; i < 2; i++) {
             for (String type : TYPES) {
-                for (String color: COLORS) {
-                    deck.put(color + " " + type, type);
+                for (String color : COLORS) {
+                    deck.add(color + " " + type);
                 }
             }
         }
 
         // each color only has one 0
-        for (String color: COLORS) {
-            deck.put(color + " " + "0", "0");
+        for (String color : COLORS) {
+            deck.add(color + " 0");
         }
 
         // add 4 wild cards
         int count = 0;
-        while (count <4) {
-            deck.put("Wild Card - Choose any color" , "any color");
+        while (count < 4) {
+            deck.add("Wild Card - Choose any color");
             count++;
         }
 
 
         // add 4 black wild cards that have a draw 4
         count = 0;
-        while (count <4) {
-            deck.put("Wild Card - Choose any color and next person draws 4" , "any color and draw 4");
+        while (count < 4) {
+            deck.add("Wild Card - Choose any color and next person draws 4");
             count++;
         }
 
         System.out.println(deck);
-
-// don;t need anymore:
-//        for (int i = 0; i < RANKS.length; i++) {
-//            for (int j = 0; j < SUITS.length; j++) {
-//                deck.add(RANKS[i] + " of " + SUITS[j]);
-//            }
-//        }
     }
 
+    int n = 108;
+    public void shuffle() {
+        for (int i = 0; i < n; i++) {
 
+            int r = i + (int) (Math.random() * (n-i));
+            String temp = deck.get(r);
 
+            // deck[r] = deck[i];
+            deck.set(r, deck.get(i));
 
-    // shuffle  - need to redo based on a hashmap
-//    public void shuffle(){
-//        for (int i = 0; i < n; i++) {
-//
-//            int r = i + (int) (Math.random() * (n-i));
-//            String temp = deck.get(r);
-//
-//            // deck[r] = deck[i];
-//            deck.set(r, deck.get(i));
-//
-//            // deck[i] = temp;
-//            deck.set(i, temp);
-//        }
-//
-//
-//    }
+            // deck[i] = temp;
+            deck.set(i, temp);
+        }
 
+        putInStack();
+    }
+
+    public void putInStack() {
+        for (String card: deck) {
+            deckStack.push(card);
+        }
+    }
+
+    public String drawCard() {
+        return deckStack.pop();
+    }
 
 }
 
 
 
-
-//maybe remove this but idk....
-//Copyright © 2000–2017, Robert Sedgewick and Kevin Wayne.
-//Last updated: Fri Oct 20 14:12:12 EDT 2017.
