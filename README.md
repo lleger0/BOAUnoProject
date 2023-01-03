@@ -1,4 +1,4 @@
-# BOABlackjackProject
+# BOA Uno Project 
 
 Our take on the game BlackJack.
 
