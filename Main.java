@@ -1,28 +1,30 @@
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 class Main {
     static Scanner scanner = new Scanner(System.in);
-    static HashMap<String, Integer> playersScoreMap = new HashMap<>();
+    static HashMap<String, ArrayList<String> > playersHandMap = new HashMap<>();
     static ArrayList<String> playersList = new ArrayList<>();
     static String currentPlayer;
     static int players;
-
-    public static void main(String[] args) {
+    static Deck deck = new Deck();
+    public static void main(String[] args) throws InterruptedException {
         //display the rules and objective of the game
         printRules();
-        //prompt user for how many players we want and store the players names in a score hash map
-        players();
-        System.out.println(playersScoreMap);
-
-        // create a deck object
-        Deck deck = new Deck();
         // create uno deck using the standard 108 possible cards
         deck.createDeck();
         // suhffle deck and add each card onto a stack
         deck.shuffle();
+        //prompt user for how many players we want and store the players names in a score hash map
+        players();
+        String ah = "Jessica";
+        System.out.println(playersHandMap.get(ah));
+
+
+
         // draw card will pop a card off the stack
         String currCardInMiddle = deck.drawCard();
-
+        System.out.println(currCardInMiddle);
         // create a separate map that stores the hands of each player on line 106 *
 
 
@@ -30,10 +32,21 @@ class Main {
         // initialize first player -- maybe can add this as a condition that is
         // inside whoseTurn when we have a method to decide whether it is the first move ever
         currentPlayer = playersList.get(0);
+        System.out.println("Look Away!! All players except " + currentPlayer);
+        for(int i = 0; i <7;i++) {
+            System.out.println((7 - i) + " seconds left");
+            TimeUnit.SECONDS.sleep(1);
+        }
+
+
+        viewHand(currentPlayer);
+
+        String decide = scanner.nextLine();
+
+
+
         System.out.println("curr before method call " + currentPlayer);
         System.out.println("curr after method call " + whoseTurn(players, true, false, currentPlayer, playersList));
-
-
 
     }
 
@@ -47,15 +60,16 @@ class Main {
 
     // ----------------------------------
 
-    /** method to view hand of cards
-     *
+
+    /**
+     * method to view hand of cards
      */
 
-    public static String viewHand() {
+    public static ArrayList<String> viewHand(String currentPlayer) {
         // not sure what return type we want
         // maybe show user the cards and then have them choose which one they want to play and return that
-        String card = "Red 5";
-        return card;
+
+        return playersHandMap.get(currentPlayer);
     }
 
 
@@ -79,9 +93,14 @@ class Main {
 
     public static void printRules() {
         System.out.println("--------------------\n"+
-                "    Black Jack   \n"+
+                "    Uno   \n"+
                 "--------------------\n");
-        System.out.println("Rules: \n Blackjack hands are scored by their point total. The hand with the highest total wins as long as it doesn't exceed 21; a hand with a higher total than 21 is said to bust. Cards 2 through 10 are worth their face value, and face cards (jack, queen, king) are also worth 10. An Ace can be worth one or eleven, you decide. \nEnjoy playing!");
+        System.out.println("Rules: \n Firstly distribute 7 cards to each player, take one card from the draw pile and placed it in the center of everyone. Also, you have to choose the first player randomly and then the game will continue clockwise, the left player will play the next." +
+                "\n\nAt the beginning of the turn, the player can choose his card by matching the number or color from the center-placed card. If the card is matched then the game continues to the next player.\n\n" +
+                "If it’s not matched then you can draw any of the special cards from your hand. It can be a Wild Card or Wild draw 4 card. We have already discussed it in the brief above.Enjoy playing!\n\n"+
+                "If none of the cards matched (face cards or special cards) then the player has to pick the top card from the draw pile. If the drawn card cannot be played then the player has to pass their chance to the next player.\n\n" +
+                "Also, don’t forget to throw special cards in between to make other players stop from winning and also for adding spice to the game.\n\n" +
+                "The player who finishes their cards earlier, will automatically wins the match but to win the game you have to check the scoring points section.\n");
 
 
 
@@ -102,7 +121,12 @@ class Main {
             String playerName = scanner.nextLine();
             // create an exception if the user does not enter a name
             //if (playerName.isEmpty())
-            playersScoreMap.put(playerName, 0);
+            ArrayList<String> hand = new ArrayList<>();
+            for (int j = 0; j < 7; j++) {
+
+                        hand.add(deck.drawCard());
+            }
+            playersHandMap.put(playerName,hand);
 
             playersList.add(playerName);
         }

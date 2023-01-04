@@ -15,7 +15,7 @@ import java.util.Stack;
  * .....
  * Red Draw 2
  *
- * Possiblities:
+ * Possibilities:
  * 2 cards of each color 1-9
  * 2 cards of each color for Draw 2, Skip, and Reverse
  * 1 card of each color 0
