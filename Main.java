@@ -15,23 +15,25 @@ class Main {
         deck.createDeck();
         // suhffle deck and add each card onto a stack
         deck.shuffle();
-        //prompt user for how many players we want and store the players names in a score hash map
+        //prompt user for how many players we want and store the players names in a array of cards in player hand hash map
         players();
-        String ah = "Jessica";
-        System.out.println(playersHandMap.get(ah));
+
+//        String ah = "Jessica";
+//        System.out.println(playersHandMap.get(ah));
 
 
 
         // draw card will pop a card off the stack
         String currCardInMiddle = deck.drawCard();
-        System.out.println(currCardInMiddle);
+        System.out.println("Current Card in the middle " + currCardInMiddle);
         // create a separate map that stores the hands of each player on line 106 *
-
-
 
         // initialize first player -- maybe can add this as a condition that is
         // inside whoseTurn when we have a method to decide whether it is the first move ever
         currentPlayer = playersList.get(0);
+        System.out.println("Current Player " + currentPlayer);
+
+
         System.out.println("Look Away!! All players except " + currentPlayer);
         for(int i = 0; i <7;i++) {
             System.out.println((7 - i) + " seconds left");
@@ -39,16 +41,46 @@ class Main {
         }
 
 
-        viewHand(currentPlayer);
+        System.out.println("hand for " + currentPlayer + " is " + viewHand(currentPlayer));
 
+
+        System.out.println("Select the index of the card you want, ie., from left to right it's 1,2,3,4....");
         String decide = scanner.nextLine();
+        if (decide.equals("d")){}
+        else{
+            int d = Integer.valueOf(decide);
+            if(validateCard(currCardInMiddle, playersHandMap.get(currentPlayer).get(d - 1))){
+
+                //make the card go in the middle
+                currCardInMiddle = playersHandMap.get(currentPlayer).get(d - 1);
+                //validate card must be completed first
+                if(currCardInMiddle.contains("Draw 2")){
+                    System.out.println("Uh oh next player must draw 2");
+
+                    //we should have a draw 2 method here
+                } else if (currCardInMiddle.contains("Wild Card")) {
+                    System.out.println("Wild card");
+                } else if (currCardInMiddle.contains("Reverse")) {
+                    System.out.println("Reverse");
+                }else {
+
+                    System.out.println("New card in the middle is " + currCardInMiddle);
+                    playersHandMap.get(currentPlayer).remove(d - 1);
+                    System.out.println("Player's hand map for current player" + playersHandMap.get(currentPlayer));
+                }
+            }
+
+
+        }
 
 
 
-        System.out.println("curr before method call " + currentPlayer);
-        System.out.println("curr after method call " + whoseTurn(players, true, false, currentPlayer, playersList));
+        System.out.println("the player before method call " + currentPlayer);
+        System.out.println("the player after method call " + whoseTurn(players, true, false, currentPlayer, playersList));
 
     }
+
+
 
     /** method to deal x number of cards to player
      *
@@ -80,6 +112,31 @@ class Main {
      */
     public static boolean validateCard(String currCardInMiddle, String cardPlayerWantsToPlay) {
         // have to split the string into two parts and see if either matches the currCardInMiddle
+        String colorOfCardInMiddle = currCardInMiddle.split(" ")[0];
+        String colorPlayerWantsToPlay = cardPlayerWantsToPlay.split(" ")[0];
+        System.out.println("colorOfCardInMiddle " + colorOfCardInMiddle);
+        System.out.println("colorPlayerWantsToPlay " + colorPlayerWantsToPlay);
+
+        String numberOfCardInMiddle = currCardInMiddle.split(" ")[1];
+        String numberPlayerWantsToPlay = cardPlayerWantsToPlay.split(" ")[1];
+        System.out.println("numberOfCardInMiddle " + numberOfCardInMiddle);
+        System.out.println("numberPlayerWantsToPlay " + numberPlayerWantsToPlay);
+
+        if(colorOfCardInMiddle.equals(colorPlayerWantsToPlay)) {
+            System.out.println("Good choice!");
+            return true;
+        }
+        if (numberOfCardInMiddle.equals(numberPlayerWantsToPlay)) {
+            System.out.println("Good choice!");
+            return true;
+        }
+
+
+
+//        if(cardPlayerWantsToPlay.equals("Wild Card - Choose any color and next person draws 4")){
+//
+//        }
+
 
         return false;
     }
@@ -152,7 +209,7 @@ class Main {
                 turnList.add(player);
                 index--;
             }
-            System.out.println("Turn List after reversing" + turnList);
+            System.out.println("Turn List for reversing" + turnList);
         }
         else {
             for (String player: playersList) {
@@ -164,6 +221,8 @@ class Main {
 
         //  j  -> k > l --> m
         //  m -> l ->  k --> j
+
+
         Iterator it  = turnList.iterator();
         while (it.hasNext()) {
 
