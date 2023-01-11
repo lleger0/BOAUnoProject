@@ -14,6 +14,7 @@ class Main {
     static int sum = 0;
     static String decide;
     static  ArrayList<String> currHand;
+    static String currCardInMiddle;
     public static void main(String[] args) throws InterruptedException {
         //display the rules and objective of the game
         printRules();
@@ -24,14 +25,17 @@ class Main {
         //prompt user for how many players we want and store the players names in a array of cards in player hand hash map
         players();
         // draw card will pop a card off the stack
-        String currCardInMiddle = deck.drawCard();
-        System.out.println("Current Card in the middle: " + currCardInMiddle);
-        // create a separate map that stores the hands of each player on line 106 *
+        currCardInMiddle = deck.drawCard();
+
+        // we need this to initialize the first card in the middle and then later it is updated
+
+//         create a separate map that stores the hands of each player on line 106 *
 
         // initialize first player
         currentPlayer = playersList.get(0);
 
         do {
+            System.out.println("Card in the middle: " + currCardInMiddle);
             System.out.println("Current Player: " + currentPlayer);
             System.out.println("Look Away!! All players except " + currentPlayer);
 //            for(int i = 0; i <7;i++) {
@@ -39,102 +43,143 @@ class Main {
 //                TimeUnit.SECONDS.sleep(1);
 //            }
             viewHand(currentPlayer);
-
 //            System.out.println("Testing hand before collecting all the cards: " + playersHandMap.get(currentPlayer));
+            currHand = playersHandMap.get(currentPlayer);
+            decide = getUserDecision(); // prompts user and updates the decide variabl
 
-            if (currCardInMiddle.contains("Draw"))  {
-                System.out.println("Since the previous card was a draw 2 or draw 4, type the option of a draw 2 or draw 4 card you want to play, " +
-                        "or type s to collect " + sum + " cards");
-            }
-            else {
-                System.out.println("Select the option of the card you want to play; 1, 2, 3 ... " +
-                        "Type d if you want to draw a card and end your turn");
 
-            }
-            decide = scanner.nextLine();
-           currHand = playersHandMap.get(currentPlayer);
-            if (decide.equals("d")){
-                playersHandMap.get(currentPlayer).add(deck.drawCard());
-                viewHand(currentPlayer);
-                currentPlayer = whoseTurn(players, reverse,skip, currentPlayer,playersList);
+            if (decide.equals("d")) {
+                String newCard = deck.drawCard();
+                currHand.add(newCard);
+                System.out.println(currentPlayer + ", you drew a " + newCard + ". End of your turn.");
             }
             else if (decide.equals("s")) {
-                 for (int i=0; i<sum ; i++) {
-                    currHand.add(deck.drawCard());
+                System.out.print(currentPlayer + ", you have just drawn: ");
+                 for (int i=0; i<sum; i++) {
+                     String card = deck.drawCard();
+                     System.out.print(card);
+                     currHand.add(card);
+                     if (i==sum-1) {
+                         break;
+                     }
+                     System.out.println(", ");
                  }
-                 System.out.println("Testing hand after collecting all the cards: " + playersHandMap.get(currentPlayer));
+                System.out.println("End of your turn.");
+
+                // System.out.println("Testing hand after collecting all the cards: " + playersHandMap.get(currentPlayer));
                  sum = 0;
                  currCardInMiddle = currCardInMiddle.split(" ")[0] + " Card";
-                 currentPlayer = whoseTurn(players, reverse,skip, currentPlayer,playersList);
+
             }
          
             else {
+                // this block is for if the last card was not a wild card or a draw
                 int d = Integer.valueOf(decide);
-                if(validateCard(currCardInMiddle, playersHandMap.get(currentPlayer).get(d - 1))){
+                if(validateCard(currCardInMiddle, currHand.get(d - 1))){
                     System.out.println("Good Choice!");
-
                     //make the card go in the middle
-                    currCardInMiddle = playersHandMap.get(currentPlayer).get(d - 1);
+                    currCardInMiddle = currHand.get(d - 1);
                     //validate card must be completed first
-                    if(currCardInMiddle.contains("Draw-2")){
-                        System.out.println("Uh oh next player must draw 2");
-                        sum += 2;
-                        //we should have a draw 2 method here
-                    }
-                    if (currCardInMiddle.contains("Draw-4")) {
-                        sum += 4;
-                    }
-                    else {
-
-                        System.out.println("New card in the middle is " + currCardInMiddle);
-
-                        
-                    }
-                     playersHandMap.get(currentPlayer).remove(d - 1);
-//                     System.out.println("Updated hand map for current player" + playersHandMap.get(currentPlayer));
-
-                    if (currCardInMiddle.contains("Wild Card")) {
-                        System.out.println("Wild card");
-                        String newColor;
-                        do {
-                            System.out.println("What color would you like to change the pile to? Red, Green, Blue or Yellow. Please capitalize first letter!");
-                            newColor = scanner.nextLine();
-                        } while (!(newColor.equals("Red") || newColor.equals("Blue") || newColor.equals("Green") || newColor.equals("Yellow")));
-
-                        
-                        currCardInMiddle = newColor + " Card";
-                    } else if (currCardInMiddle.contains("Reverse")) {
-                        System.out.println("Reverse");
-                        reverse = !reverse;
-                    }
-
-                    else if (currCardInMiddle.contains("Skip")) {
-                        System.out.println("Skip");
-                        skip = true;
-
-                    }
-
-                    currentPlayer = whoseTurn(players, reverse,skip, currentPlayer,playersList);
-                    skip = false;
+                    dealWithPlayerPlayingFaceCards(d);
                 }
                 else {
                     System.out.println("Not a valid card! Please select again");
+                    continue;
                 }
             }
 
+            if(currHand.isEmpty()) {
+                System.out.println("Congratulations! The winner is " + currentPlayer + " !!!");
+            }
 
-            System.out.println("Current Card in the middle " + currCardInMiddle);
-
+            currentPlayer = whoseTurn(players, reverse, skip, currentPlayer,playersList);
+            skip = false;
         } while(!currHand.isEmpty());
 
-        System.out.println("Congratulations! The winner is " + currentPlayer + " !!!");
+
 
 //
 //        System.out.println("the player before method call " + currentPlayer);
 //        System.out.println("the player after method call " + whoseTurn(players, true, false, currentPlayer, playersList));
 
     }
+    static void dealWithPlayerPlayingFaceCards(int d) {
+        if (currCardInMiddle.contains("Draw-2")) {
+            System.out.println("Uh oh next player must draw 2");
+            sum += 2;
+            //we should have a draw 2 method here
+        }
+        if (currCardInMiddle.contains("Draw-4")) {
+            System.out.println("Uh oh next player must draw 4");
+            sum += 4;
+        }
+        // redundant
+//                    else {
+//                        System.out.println("New card in the middle is " + currCardInMiddle);
+//                    }
+        playersHandMap.get(currentPlayer).remove(d - 1);
+//                     System.out.println("Updated hand map for current player" + playersHandMap.get(currentPlayer));
 
+        if (currCardInMiddle.contains("Wild")) {
+//                        System.out.println("Wild card");
+            String newColor;
+            do {
+                System.out.println("What color would you like to change the pile to? Red, Green, Blue or Yellow.");
+                newColor = scanner.nextLine();
+                newColor = newColor.split("",2)[0].toUpperCase() + newColor.split("",2)[1].toLowerCase();
+            } while (!(newColor.equals("Red") || newColor.equals("Blue") || newColor.equals("Green") || newColor.equals("Yellow")));
+            currCardInMiddle = newColor + " Card";
+        } else if (currCardInMiddle.contains("Reverse")) {
+            System.out.println("Reverse");
+            reverse = !reverse;
+        } else if (currCardInMiddle.contains("Skip")) {
+            System.out.println("Skip");
+            skip = true;
+        }
+    }
+
+    static String getUserDecision() {
+        boolean isValid = false;
+        if (currCardInMiddle.contains("Draw"))  {
+            System.out.println("Since the previous card was a draw 2 or draw 4, type the option of a draw 2 or draw 4 card you want to play, " +
+                    "or type s to collect " + sum + " cards");
+            do {
+                try {
+                    decide = scanner.nextLine();
+                    if (decide.equals("s")) {
+                        break;
+                    }
+                    currHand.get(Integer.valueOf(decide)-1);
+                    isValid = true;
+                }
+                catch (Exception e) {
+                    System.out.println("Invalid option! You must type s or a valid option from your hand. " + e.getMessage());
+                }
+
+            } while(!isValid);
+        }
+        else {
+            System.out.println("Select the option of the card you want to play; 1, 2, 3 ... " +
+                    "Type d if you want to draw a card and end your turn");
+            do {
+                try {
+                    decide = scanner.nextLine();
+                    if(decide.equals("d")) {
+                        break;
+                    }
+                    currHand.get(Integer.valueOf(decide)-1);
+                    isValid = true;
+                }
+                catch (Exception e) {
+                    System.out.println("Invalid option! You must type d or a valid option from your hand. " + e.getMessage());
+                }
+
+            } while(!isValid);
+        }
+
+        return decide;
+//        System.out.println(decide);
+    }
 
 
     /** method to deal x number of cards to player
@@ -219,12 +264,13 @@ class Main {
         System.out.println("--------------------\n"+
                 "    Uno   \n"+
                 "--------------------\n");
-        System.out.println("Rules: \n Firstly distribute 7 cards to each player, take one card from the draw pile and placed it in the center of everyone. Also, you have to choose the first player randomly and then the game will continue clockwise, the left player will play the next." +
-                "\n\nAt the beginning of the turn, the player can choose his card by matching the number or color from the center-placed card. If the card is matched then the game continues to the next player.\n\n" +
-                "If it’s not matched then you can draw any of the special cards from your hand. It can be a Wild Card or Wild draw 4 card. We have already discussed it in the brief above.Enjoy playing!\n\n"+
-                "If none of the cards matched (face cards or special cards) then the player has to pick the top card from the draw pile. If the drawn card cannot be played then the player has to pass their chance to the next player.\n\n" +
-                "Also, don’t forget to throw special cards in between to make other players stop from winning and also for adding spice to the game.\n\n" +
-                "The player who finishes their cards earlier, will automatically wins the match but to win the game you have to check the scoring points section.\n");
+        System.out.println("Rules: \nEach player is distributed 7 cards. One card will be drawn from the pile and placed it in the middle of everyone." +
+                "\nAt the beginning of the turn, the player can choose his card by matching the number or color from the center-placed card.\n\n" +
+                " --> If the card is matched then the game continues to the next player.\n" +
+                " --> If it’s not matched then you can draw any of the special cards from your hand. It can be a Wild Card or Wild draw 4 card. \n" +
+                " --> If none of the cards matched (face cards or special cards) then the player has to pick the top card from the draw pile and ends their turn. \n\n" +
+                "Also, don’t forget to throw special cards in between to stop others from winning and also for adding spice to the game.\n" +
+                "The player who finishes their cards earlier wins the game.\n");
 
 
 
@@ -247,8 +293,7 @@ class Main {
             //if (playerName.isEmpty())
             ArrayList<String> hand = new ArrayList<>();
             for (int j = 0; j < 7; j++) {
-
-                        hand.add(deck.drawCard());
+                hand.add(deck.drawCard());
             }
             playersHandMap.put(playerName,hand);
 
@@ -310,6 +355,7 @@ class Main {
                         currPlayer = turnList.getFirst();
                         break;
                     }
+
                     currPlayer = it.next().toString();
                 }
                 else {
@@ -322,8 +368,5 @@ class Main {
 
         return currPlayer;
     }
-
-
-
 
 } 

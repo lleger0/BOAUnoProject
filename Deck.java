@@ -68,7 +68,7 @@ public class Deck {
             count++;
         }
 
-        System.out.println(deck);
+//        System.out.println(deck);
     }
 
     int n = 108;
