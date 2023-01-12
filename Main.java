@@ -15,6 +15,7 @@ class Main {
     static String decide;
     static  ArrayList<String> currHand;
     static String currCardInMiddle;
+    static ConsoleColors consoleColors = new ConsoleColors();
     public static void main(String[] args) throws InterruptedException {
         //display the rules and objective of the game
         printRules();
@@ -25,24 +26,29 @@ class Main {
         //prompt user for how many players we want and store the players names in a array of cards in player hand hash map
         players();
         // draw card will pop a card off the stack
-        currCardInMiddle = deck.drawCard();
+        do {
+            currCardInMiddle = deck.drawCard();
+        } while(currCardInMiddle.contains("Draw")|| currCardInMiddle.contains("Reverse") || currCardInMiddle.contains("Skip"));
 
         // we need this to initialize the first card in the middle and then later it is updated
 
-//         create a separate map that stores the hands of each player on line 106 *
+        // create a separate map that stores the hands of each player on line 106 *
 
         // initialize first player
         currentPlayer = playersList.get(0);
 
         do {
-            System.out.println("Card in the middle: " + currCardInMiddle);
+            System.out.print("Card in the middle: " );
+            colorTheString(currCardInMiddle);
             System.out.println("Current Player: " + currentPlayer);
             System.out.println("Look Away!! All players except " + currentPlayer);
 //            for(int i = 0; i <7;i++) {
 //                System.out.println((7 - i) + " seconds left");
 //                TimeUnit.SECONDS.sleep(1);
 //            }
+//            System.out.println("\\033[H\\033[2J");
             viewHand(currentPlayer);
+
 //            System.out.println("Testing hand before collecting all the cards: " + playersHandMap.get(currentPlayer));
             currHand = playersHandMap.get(currentPlayer);
             decide = getUserDecision(); // prompts user and updates the decide variabl
@@ -51,20 +57,22 @@ class Main {
             if (decide.equals("d")) {
                 String newCard = deck.drawCard();
                 currHand.add(newCard);
-                System.out.println(currentPlayer + ", you drew a " + newCard + ". End of your turn.");
+                System.out.println(currentPlayer + ", you drew a ");
+                colorTheString(newCard);
+                System.out.println("End of your turn.");
             }
-            else if (decide.equals("s")) {
-                System.out.print(currentPlayer + ", you have just drawn: ");
+            else if ((decide.equals("s") || !currHand.get(Integer.valueOf(decide)-1).equals("Draw")) && sum!=0) {
+                System.out.print(currentPlayer + ", you have just drawn: \n");
                  for (int i=0; i<sum; i++) {
                      String card = deck.drawCard();
-                     System.out.print(card);
+                     colorTheString(card);
                      currHand.add(card);
                      if (i==sum-1) {
                          break;
                      }
-                     System.out.println(", ");
+                     System.out.print(", ");
                  }
-                System.out.println("End of your turn.");
+                System.out.println("\nEnd of your turn.");
 
                 // System.out.println("Testing hand after collecting all the cards: " + playersHandMap.get(currentPlayer));
                  sum = 0;
@@ -89,11 +97,64 @@ class Main {
             }
 
             if(currHand.isEmpty()) {
-                System.out.println("Congratulations! The winner is " + currentPlayer + " !!!");
+                System.out.println("Congratulations! Uno Out! The winner is " + currentPlayer + "!!!");
+                System.out.println("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⣠⣤⣤⣄⣀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠤⠖⠊⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠙⠲⢤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⠀⠀⡤⠊⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⠀⡜⠀⠀⠀⠀⠀⠀⢀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢢⠀⠀⠀⠀⠀⢳⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⣸⠁⠀⠀⠀⠀⠀⠀⠀⠱⡀⠀⠀⠀⠀⠀⠀⠀⡀⠈⠀⡀⠀⠀⠀⠈⡇⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⡏⠀⠀⠀⠀⠀⠀⠀⠀⡰⠁⠀⠀⠀⠀⠀⠀⠀⠘⡆⡜⠁⠀⠀⠀⠀⢧⡀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠸⡀⠀⠀⠀⠀⠀⣀⣤⡂⠀⠇⠱⠀⡀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⢇⠀⠀⠀⠀⠀⠀⠀⠀⠈⢄⡀⢠⣟⢭⣥⣤⠽⡆⠀⡶⣊⣉⣲⣤⢀⡞⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⠘⣆⠀⠀⠀⠀⠀⠀⡀⠀⠐⠂⠘⠄⣈⣙⡡⡴⠀⠀⠙⣄⠙⣛⠜⠘⣆⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⠀⠈⢦⡀⠀⠀⠀⢸⠁⠀⠀⠀⠀⠀⠀⠄⠊⠀⠀⠀⠀⡸⠛⠀⠀⠀⢸⠆⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⠀⠀⠀⠈⠓⠦⢄⣘⣄⠀⠀⠀⠀⠀⠀⠀⡠⠀⠀⠀⠀⣇⡀⠀⠀⣠⠎⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣸⠁⠈⡟⠒⠲⣄⠀⠀⡰⠇⠖⢄⠀⠀⡹⡇⢀⠎⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡇⠀⠀⡇⠀⠀⠹⠀⡞⠀⠀⢀⠤⣍⠭⡀⢱⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⠀⠀⠀⠀⠀⠀⢀⣀⣀⣠⠞⠀⠀⢠⡇⠀⠀⠀⠀⠁⠀⢴⠥⠤⠦⠦⡼⠀⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⣀⣤⣴⣶⣿⣿⡟⠁⠀⠋⠀⠀⠀⢸⠁⠀⠀⠀⠀⠀⠀⠀⠑⣠⢤⠐⠁⠀⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⣿⣿⣿⣿⣿⡟⠀⠀⠀⠀⠀⠀⠀⢸⡀⠀⠀⠀⠀⠀⠀⠀⠀⠬⠥⣄⠀⠀⠈⠲⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠙⠦⣄⠀⠀⠀⠀⠀⠀⠀⠀⠈⢳⠀⠀⢀⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀\n" +
+                        "⣿⣿⣿⣿⣿⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⠒⠦⠤⢤⣄⣀⣠⠤⢿⣶⣶⣿⣿⣿⣶⣤⡀⠀⠀⠀⠀⠀\n" +
+                        "⣿⣿⣿⣿⣿⣿⣷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡼⠁⠀⠀⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣄⠀⠀⠀⠀\n" +
+                        "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶⣦⣤⣤⣀⣀⣀⣀⣀⣀⣀⣤⣤⣤⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀");
             }
 
             currentPlayer = whoseTurn(players, reverse, skip, currentPlayer,playersList);
             skip = false;
+
+            System.out.println("_¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶\n" +
+                    "_¶¶___________________________________¶¶\n" +
+                    "_¶¶___________________________________¶¶\n" +
+                    "__¶¶_________________________________¶¶_\n" +
+                    "__¶¶_________________________________¶¶_\n" +
+                    "___¶¶_______________________________¶¶__\n" +
+                    "___¶¶______________________________¶¶___\n" +
+                    "____¶¶¶__________________________¶¶¶____\n" +
+                    "_____¶¶¶¶_¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶_¶¶¶¶_____\n" +
+                    "_______¶¶¶¶_¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶_¶¶¶¶_______\n" +
+                    "_________¶¶¶¶_¶¶¶¶¶¶¶¶¶¶¶¶_¶¶¶¶_________\n" +
+                    "___________¶¶¶¶¶_¶¶¶¶¶¶¶_¶¶¶¶___________\n" +
+                    "______________¶¶¶¶_¶¶¶_¶¶¶______________\n" +
+                    "________________¶¶¶_¶_¶¶________________\n" +
+                    "_________________¶¶¶_¶¶_________________\n" +
+                    "__________________¶¶_¶¶_________________\n" +
+                    "__________________¶¶_¶__________________\n" +
+                    "__________________¶¶_¶¶_________________\n" +
+                    "________________¶¶¶_¶_¶¶¶_______________\n" +
+                    "_____________¶¶¶¶¶__¶__¶¶¶¶¶____________\n" +
+                    "__________¶¶¶¶¶_____¶_____¶¶¶¶__________\n" +
+                    "________¶¶¶¶________¶_______¶¶¶¶¶_______\n" +
+                    "_______¶¶¶__________¶__________¶¶¶¶_____\n" +
+                    "_____¶¶¶____________¶____________¶¶¶____\n" +
+                    "____¶¶¶_____________¶______________¶¶___\n" +
+                    "___¶¶¶______________¶_______________¶¶__\n" +
+                    "___¶¶_______________¶________________¶¶_\n" +
+                    "__¶¶________________¶________________¶¶_\n" +
+                    "__¶¶_______________¶¶¶________________¶_\n" +
+                    "__¶¶_¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶_¶¶\n" +
+                    "__¶¶_¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶_¶¶\n" +
+                    "__¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶¶\n");
         } while(!currHand.isEmpty());
 
 
@@ -102,6 +163,29 @@ class Main {
 //        System.out.println("the player before method call " + currentPlayer);
 //        System.out.println("the player after method call " + whoseTurn(players, true, false, currentPlayer, playersList));
 
+    }
+
+    static void colorTheString(String currCard) {
+        String color = currCard.split(" ")[0];
+        if (color.equals("Red")) {
+            System.out.println(consoleColors.RED_BOLD + currCard +
+                    consoleColors.RESET);
+        }
+        if (color.equals("Blue")) {
+            System.out.println(consoleColors.BLUE_BOLD + currCard +
+                    consoleColors.RESET);
+        }
+        if (color.equals("Yellow")) {
+            System.out.println(consoleColors.YELLOW_BOLD + currCard+
+                    consoleColors.RESET);
+        } if (color.equals("Green")) {
+            System.out.println(consoleColors.GREEN_BOLD + currCard +
+                    consoleColors.RESET);
+        }
+        if (color.contains("Wild")) {
+            System.out.println(consoleColors.WHITE_BOLD + currCard +
+                    consoleColors.RESET);
+        }
     }
     static void dealWithPlayerPlayingFaceCards(int d) {
         if (currCardInMiddle.contains("Draw-2")) {
@@ -128,7 +212,15 @@ class Main {
                 newColor = scanner.nextLine();
                 newColor = newColor.split("",2)[0].toUpperCase() + newColor.split("",2)[1].toLowerCase();
             } while (!(newColor.equals("Red") || newColor.equals("Blue") || newColor.equals("Green") || newColor.equals("Yellow")));
-            currCardInMiddle = newColor + " Card";
+
+            if (currCardInMiddle.contains("Draw-4")) {
+                currCardInMiddle = newColor + " Anything";
+            }
+            else {
+                currCardInMiddle = newColor + " Card";
+            }
+
+
         } else if (currCardInMiddle.contains("Reverse")) {
             System.out.println("Reverse");
             reverse = !reverse;
@@ -140,9 +232,11 @@ class Main {
 
     static String getUserDecision() {
         boolean isValid = false;
-        if (currCardInMiddle.contains("Draw"))  {
-            System.out.println("Since the previous card was a draw 2 or draw 4, type the option of a draw 2 or draw 4 card you want to play, " +
-                    "or type s to collect " + sum + " cards");
+        if (currCardInMiddle.contains("Draw") || currCardInMiddle.contains("Anything")) {
+            System.out.println(consoleColors.PURPLE_BOLD +  "Since the previous card was a draw 2 or draw 4, type the option of a draw 2 or draw 4 card you want to play, " +
+                            "or type s to collect " + sum + " cards" +
+                            consoleColors.RESET
+                   );
             do {
                 try {
                     decide = scanner.nextLine();
@@ -158,6 +252,7 @@ class Main {
 
             } while(!isValid);
         }
+
         else {
             System.out.println("Select the option of the card you want to play; 1, 2, 3 ... " +
                     "Type d if you want to draw a card and end your turn");
@@ -181,16 +276,16 @@ class Main {
 //        System.out.println(decide);
     }
 
-
-    /** method to deal x number of cards to player
-     *
-     */
-    public static void dealXCards(int numOfCards) {
-        // not sure what return type we want
-        // maybe return an array? or store an array
-    }
-
-    // ----------------------------------
+//
+//    /** method to deal x number of cards to player
+//     *
+//     */
+//    public static void dealXCards(int numOfCards) {
+//        // not sure what return type we want
+//        // maybe return an array? or store an array
+//    }
+//
+//    // ----------------------------------
 
 
     /**
@@ -198,12 +293,16 @@ class Main {
      */
 
     public static void viewHand(String currentPlayer) {
+
         // not sure what return type we want
         // maybe show user the cards and then have them choose which one they want to play and return that
         ArrayList<String> hand = playersHandMap.get(currentPlayer);
         int count = 1;
         for (String card: hand) {
-            System.out.println(" (" + count + ") "+ card);
+            String color = card.split(" ")[0];
+                System.out.print(" (" + count + ") ");
+                colorTheString(card);
+//            System.out.println(" (" + count + ") "+ card);
             count++;
         }
 
@@ -245,9 +344,7 @@ class Main {
             return true;
         }
 
-//        if(cardPlayerWantsToPlay.equals("Wild Card - Choose any color and next person draws 4")){
-//
-//        }
+
 
 
         return false;
@@ -262,7 +359,13 @@ class Main {
 
     public static void printRules() {
         System.out.println("--------------------\n"+
-                "    Uno   \n"+
+                "   \n" +
+                "██╗░░░██╗███╗░░██╗░█████╗░\n" +
+                "██║░░░██║████╗░██║██╔══██╗\n" +
+                "██║░░░██║██╔██╗██║██║░░██║\n" +
+                "██║░░░██║██║╚████║██║░░██║\n" +
+                "╚██████╔╝██║░╚███║╚█████╔╝\n" +
+                "░╚═════╝░╚═╝░░╚══╝░╚════╝░  \n"+
                 "--------------------\n");
         System.out.println("Rules: \nEach player is distributed 7 cards. One card will be drawn from the pile and placed it in the middle of everyone." +
                 "\nAt the beginning of the turn, the player can choose his card by matching the number or color from the center-placed card.\n\n" +
@@ -306,7 +409,6 @@ class Main {
 //     // if reverse
 //    [1, 2, 3, 2, 1, 4, 3, 2, 1]
     public static String whoseTurn(int numOfPlayers, boolean reverse, boolean skip, String currPlayer, ArrayList<String> playersList) {
-        // change the condition to
 
         LinkedList<String> turnList = new LinkedList<>();
 
@@ -326,46 +428,60 @@ class Main {
         else {
             for (String player: playersList) {
                 turnList.add(player);
+//                System.out.println(player);
             }
 //            System.out.println("Turn List with no reversing" + turnList);
         }
 
-
+//        System.out.println(turnList);
         //  j  -> k > l --> m
         //  m -> l ->  k --> j
 
 
         Iterator it  = turnList.iterator();
         while (it.hasNext()) {
-
-            if (currPlayer.equals(turnList.getLast())) {
-//                System.out.println("hey there ");
-                currPlayer = turnList.getFirst();
-//                System.out.println("hey there: " + currPlayer);
-                break;
-            }
-            else if (it.next().equals(currPlayer)) {
+            if (it.next().equals(currPlayer)) {
                 if (skip) {
 //                    System.out.println("test");
 //                    System.out.println("Next: " + it.next());
 //                    System.out.println("Next next: " + it.next());
                     // k --> skip l --> j
-                    currPlayer = it.next().toString();
-                    if (currPlayer.equals(turnList.getLast())) {
+
+                    // if you're second to last
+                    try {
+                        // if you're last
+                        if (currPlayer.equals(turnList.getLast())) {
+                            Iterator head = turnList.iterator();
+                            currPlayer = head.next().toString();
+                            currPlayer = head.next().toString();
+                            //   turnList.indexOf(turnList.getFirst());
+                            break;
+                        }
+                        currPlayer = it.next().toString();
+//                        System.out.println("currPlayer after one next:" + currPlayer);
+                        currPlayer = it.next().toString();
+//                        System.out.println("currPlayer after next twice:" + currPlayer);
+
+                    }
+                    catch(Exception e) {
+                        // if it is the second to last one
+                        // return the first one
                         currPlayer = turnList.getFirst();
-                        break;
                     }
 
-                    currPlayer = it.next().toString();
                 }
                 else {
+                    if (currPlayer.equals(turnList.getLast())) {
+//                System.out.println("hey there ");
+                        currPlayer = turnList.getFirst();
+//                System.out.println("hey there: " + currPlayer);
+                        break;
+                    }
                     currPlayer = it.next().toString();
                     break;
                 }
             }
         }
-
-
         return currPlayer;
     }
 
